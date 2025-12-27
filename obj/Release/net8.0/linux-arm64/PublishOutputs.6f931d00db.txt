@@ -1,4 +1,0 @@
-/home/cindy/RiderProjects/WebApplication2/publish-arm64/appsettings.Development.json
-/home/cindy/RiderProjects/WebApplication2/publish-arm64/appsettings.json
-/home/cindy/RiderProjects/WebApplication2/publish-arm64/WebApplication2.pdb
-/home/cindy/RiderProjects/WebApplication2/publish-arm64/WebApplication2

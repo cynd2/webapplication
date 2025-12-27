@@ -1,7 +1,0 @@
-/home/cindy/RiderProjects/WebApplication2/WebApplication2/bin/Release/net8.0/publish/WebApplication2
-/home/cindy/RiderProjects/WebApplication2/WebApplication2/bin/Release/net8.0/publish/appsettings.Development.json
-/home/cindy/RiderProjects/WebApplication2/WebApplication2/bin/Release/net8.0/publish/appsettings.json
-/home/cindy/RiderProjects/WebApplication2/WebApplication2/bin/Release/net8.0/publish/WebApplication2.dll
-/home/cindy/RiderProjects/WebApplication2/WebApplication2/bin/Release/net8.0/publish/WebApplication2.deps.json
-/home/cindy/RiderProjects/WebApplication2/WebApplication2/bin/Release/net8.0/publish/WebApplication2.runtimeconfig.json
-/home/cindy/RiderProjects/WebApplication2/WebApplication2/bin/Release/net8.0/publish/WebApplication2.pdb
