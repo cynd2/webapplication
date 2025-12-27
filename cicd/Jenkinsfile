@@ -1,0 +1,143 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'APP_NAME', defaultValue: 'jenkinsapp')
+        string(name: 'VERSION', defaultValue: '1.0.0')
+        string(name: 'RUNTIME', defaultValue: 'linux-x64')
+        string(name: 'SERVICE_NAME', defaultValue: 'jenkinsapp')
+        string(name: 'APT_REPO_PATH', defaultValue: '/usr/local/share/myrepo')
+    }
+
+    environment {
+        APP_DIR = "src"
+        BUILD_DIR = "publish"
+        DEB_DIR = "deb"
+    }
+
+    triggers {
+        pollSCM('H/5 * * * *')
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Restore') {
+            steps {
+                sh 'dotnet restore'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'dotnet build -c Release'
+            }
+        }
+
+        stage('Publish') {
+            steps {
+                sh """
+                dotnet publish \
+                  -c Release \
+                  -r ${params.RUNTIME} \
+                  --self-contained true \
+                  -o ${BUILD_DIR}
+                """
+            }
+        }
+
+        stage('Prepare DEB structure') {
+            steps {
+                sh """
+                rm -rf ${DEB_DIR}
+                mkdir -p ${DEB_DIR}/DEBIAN
+                mkdir -p ${DEB_DIR}/opt/${params.APP_NAME}
+                mkdir -p ${DEB_DIR}/etc/systemd/system
+
+                cp -r ${BUILD_DIR} ${DEB_DIR}/opt/${params.APP_NAME}/
+                """
+            }
+        }
+
+        stage('Create control & service') {
+            steps {
+                sh """
+cat > ${DEB_DIR}/DEBIAN/control <<EOF
+Package: ${params.APP_NAME}
+Version: ${params.VERSION}
+Architecture: amd64
+Maintainer: Jenkins CI
+Description: ASP.NET Web API Service
+EOF
+"""
+
+                sh """
+cat > ${DEB_DIR}/etc/systemd/system/${params.SERVICE_NAME}.service <<EOF
+[Unit]
+Description=${params.APP_NAME}
+After=network.target
+
+[Service]
+ExecStart=/opt/${params.APP_NAME}/${BUILD_DIR}/WebApplication2
+Restart=always
+User=root
+Environment=DOTNET_ENVIRONMENT=Production
+
+[Install]
+WantedBy=multi-user.target
+EOF
+"""
+            }
+        }
+
+        stage('Maintainer scripts') {
+            steps {
+                sh """
+cat > ${DEB_DIR}/DEBIAN/postinst <<'EOF'
+#!/bin/bash
+systemctl daemon-reload
+systemctl enable ${params.SERVICE_NAME}
+systemctl restart ${params.SERVICE_NAME}
+EOF
+
+chmod 755 ${DEB_DIR}/DEBIAN/postinst
+"""
+            }
+        }
+
+        stage('Build DEB') {
+            steps {
+                sh """
+dpkg-deb --build ${DEB_DIR} ${params.APP_NAME}_${params.VERSION}.deb
+"""
+            }
+        }
+
+        stage('Update local repo') {
+            steps {
+                sh """
+sudo mkdir -p ${params.APT_REPO_PATH}
+sudo cp ${params.APP_NAME}_${params.VERSION}.deb ${params.APT_REPO_PATH}/
+
+cd ${params.APT_REPO_PATH}
+sudo dpkg-scanpackages . /dev/null | gzip -9c | sudo tee Packages.gz > /dev/null
+sudo dpkg-scanpackages . /dev/null | sudo tee Packages > /dev/null
+"""
+            }
+        }
+
+        stage('Install package') {
+            steps {
+                sh """
+sudo apt update
+sudo apt install -y ${params.APP_NAME}
+"""
+            }
+        }
+    }
+}
