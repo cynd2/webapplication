@@ -121,12 +121,13 @@ dpkg-deb --build ${DEB_DIR} ${params.APP_NAME}_${params.VERSION}.deb
         stage('Update local repo') {
             steps {
                 sh """
-sudo mkdir -p ${params.APT_REPO_PATH}
-sudo cp ${params.APP_NAME}_${params.VERSION}.deb ${params.APT_REPO_PATH}/
+mkdir -p ${params.APT_REPO_PATH}
+cp ${params.APP_NAME}_${params.VERSION}.deb ${params.APT_REPO_PATH}/
+
 
 cd ${params.APT_REPO_PATH}
-sudo dpkg-scanpackages . /dev/null | gzip -9c | sudo tee Packages.gz > /dev/null
-sudo dpkg-scanpackages . /dev/null | sudo tee Packages > /dev/null
+dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
+dpkg-scanpackages . /dev/null > Packages
 """
             }
         }
