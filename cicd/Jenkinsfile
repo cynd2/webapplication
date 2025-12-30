@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'APP_NAME', defaultValue: 'jenkinsapp')
+        string(name: 'APP_NAME', defaultValue: 'webapplication')
         string(name: 'VERSION', defaultValue: '1.0.0')
         string(name: 'RUNTIME', defaultValue: 'linux-x64')
-        string(name: 'SERVICE_NAME', defaultValue: 'jenkinsapp')
+        string(name: 'SERVICE_NAME', defaultValue: 'webapplication')
         string(name: 'APT_REPO_PATH', defaultValue: '/usr/local/share/myrepo')
     }
 
