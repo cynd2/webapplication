@@ -6,13 +6,14 @@ pipeline {
         string(name: 'VERSION', defaultValue: '1.0.0')
         string(name: 'RUNTIME', defaultValue: 'linux-x64')
         string(name: 'SERVICE_NAME', defaultValue: 'webapplication')
-        string(name: 'APT_REPO_PATH', defaultValue: '$WORKSPACE/repo')
+        // string(name: 'APT_REPO_PATH', defaultValue: '$WORKSPACE/repo')
     }
 
     environment {
         APP_DIR = "src"
         BUILD_DIR = "publish"
         DEB_DIR = "deb"
+        APT_REPO_PATH = "${env.WORKSPACE}/repo"
     }
 
     triggers {
