@@ -1,0 +1,289 @@
+# 11. Returning to an Existing Job Configuration
+
+You later saw this page:
+
+```
+Build History
+Build Queue
+Build Executor Status
+webapplication
+```
+
+This means the job already exists.
+
+### To edit it:
+
+1. Click **webapplication**
+    
+2. Click **Configure** (left sidebar)
+    
+
+This is the correct way to resume configuration.
+
+---
+
+# 12. Pipeline Configuration (Critical Section)
+
+Scroll to **Pipeline** section.
+
+Set the following:
+
+### Definition
+
+```
+Pipeline script from SCM
+```
+
+### SCM
+
+```
+Git
+```
+
+If "Git" does not appear:
+
+- Plugin is missing or Jenkins not restarted after plugin install
+    
+
+Restart Jenkins:
+
+```bash
+sudo systemctl restart jenkins
+```
+
+---
+
+### Repository URL
+
+```
+git@github.com:cynd2/webapplication.git
+```
+
+---
+
+### Credentials
+
+Choose your SSH key credential.
+
+If empty:
+
+- SSH key was not added yet
+    
+- Must be added under:
+    
+    ```
+    Manage Jenkins → Credentials
+    ```
+    
+
+(SSH setup is usually the next step.)
+
+---
+
+### Branch
+
+```
+*/main
+```
+
+---
+
+### Script Path
+
+```
+Jenkinsfile
+```
+
+---
+
+### Save configuration
+
+Click **Save**.
+
+---
+
+# 13. Why Your Build Failed Previously
+
+You saw:
+
+```
+Last Failure #1 (0.1 sec)
+```
+
+Reason:
+
+- Job was created but not fully configured
+    
+- No SCM
+    
+- No Jenkinsfile
+    
+- Missing Git plugin or credentials
+    
+
+This is expected behavior.
+
+---
+
+# 14. Jenkins Workspace Explanation (Important)
+
+You were confused about paths like:
+
+```
+/usr/local/share/myrepo
+```
+
+### Important clarification:
+
+Jenkins **automatically creates a workspace**, you do NOT manually create it.
+
+Default workspace:
+
+```
+/var/lib/jenkins/workspace/<job-name>/
+```
+
+Example:
+
+```
+/var/lib/jenkins/workspace/webapplication/
+```
+
+Your Git repository will be cloned here automatically when the build starts.
+
+You do NOT need to:
+
+```bash
+mkdir workspace
+cp files manually
+```
+
+---
+
+# 15. Where Your `.deb` File Should Be Generated
+
+Your Jenkinsfile should define where the `.deb` is built, for example:
+
+```
+/var/lib/jenkins/workspace/webapplication/build/
+```
+
+or
+
+```
+/var/lib/jenkins/workspace/webapplication/dist/
+```
+
+If your Jenkinsfile expects:
+
+```
+/usr/local/share/myrepo
+```
+
+You must explicitly create and copy into it inside the pipeline.
+
+---
+
+# 16. Relationship Between Local Machine, VM, Jenkins, and Git
+
+### Your setup logically works like this:
+
+```
+Local PC
+  └── GitHub repository (source code + Jenkinsfile)
+        ↓
+Jenkins (inside VM)
+  ├── pulls code from GitHub
+  ├── builds .deb
+  ├── stores artifact
+  └── optionally publishes repo metadata
+```
+
+Your **local folder does NOT need to be copied manually into the VM**  
+as long as the code is pushed to GitHub.
+
+---
+
+# 17. Correct Workflow You Should Follow
+
+1. Work on project locally
+    
+2. Commit changes
+    
+3. Push to GitHub
+    
+4. Jenkins pulls repo automatically
+    
+5. Jenkins builds `.deb`
+    
+6. Jenkins stores or deploys it
+    
+7. Raspberry Pi installs via `dpkg -i`
+    
+
+---
+
+# 18. Summary of the Full Route You Took
+
+1. Created Linux VM
+    
+2. Installed system packages
+    
+3. Installed Java
+    
+4. Installed Jenkins
+    
+5. Started Jenkins via CLI
+    
+6. Opened Jenkins web interface
+    
+7. Installed plugins
+    
+8. Created Pipeline job
+    
+9. Failed initial build due to missing SCM
+    
+10. Returned to job configuration
+    
+11. Set Pipeline → Git → Jenkinsfile
+    
+12. Learned workspace is auto-managed
+    
+13. Understood `.deb` should be built by Jenkins, not copied manually
+    
+14. Prepared for Git SSH authentication
+    
+
+---
+
+# 19. Next Logical Step (Recommended)
+
+To continue cleanly, the next step should be:
+
+### Configure Git SSH authentication in Jenkins:
+
+- Generate SSH key as `jenkins` user
+    
+- Add public key to GitHub
+    
+- Add private key to Jenkins Credentials
+    
+- Test repo cloning
+    
+
+If you want, I can next provide:
+
+- Full SSH key setup for Jenkins + GitHub
+    
+- A correct Jenkinsfile for building `.deb`
+    
+- Folder layout for Debian packaging in CI
+    
+- Artifact publishing strategy
+    
+- Fix for dpkg-scanpackages errors
+    
+- CI → Raspberry Pi deployment flow
+    
+
+Just tell me which part you want next.
